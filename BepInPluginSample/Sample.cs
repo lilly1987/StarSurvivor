@@ -49,6 +49,7 @@ namespace BepInPluginSample
         private static ConfigEntry<bool> noPlayerHealthTakeDamage;
         private static ConfigEntry<bool> isPickup;
         private static ConfigEntry<bool> noDeductGold;
+        private static ConfigEntry<bool> rerolluses;
         // =========================================================
         #endregion
 
@@ -81,6 +82,7 @@ namespace BepInPluginSample
             noPlayerHealthTakeDamage = Config.Bind("game", "noPlayerHealthTakeDamage", true);
             isPickup = Config.Bind("game", "isPickup", true);
             noDeductGold = Config.Bind("game", "noDeductGold", true);
+            rerolluses = Config.Bind("game", "rerolluses", true);
             // xpMulti = Config.Bind("game", "xpMulti", 2f);
 
             // =========================================================
@@ -191,6 +193,8 @@ namespace BepInPluginSample
                 if (GUILayout.Button($"noPlayerHealthTakeDamage {noPlayerHealthTakeDamage.Value}")) { noPlayerHealthTakeDamage.Value = !noPlayerHealthTakeDamage.Value; }
                 if (GUILayout.Button($"isPickup {isPickup.Value}")) { isPickup.Value = !isPickup.Value; }
                 if (GUILayout.Button($"noDeductGold {noDeductGold.Value}")) { noDeductGold.Value = !noDeductGold.Value; }
+                if (GUILayout.Button($"rerolluses {rerolluses.Value}")) { rerolluses.Value = !rerolluses.Value; }
+                if (GUILayout.Button($"campaign.gold=1000000")) { Singleton<SaveController>.i.data.campaign.gold=1000000; }
                 
                 // GUILayout.BeginHorizontal();
                 // GUILayout.Label($"ammoMulti {ammoMulti.Value}");
@@ -253,6 +257,19 @@ namespace BepInPluginSample
             }
             logger.LogWarning($"PickupVacuum");
             value = 0;
+        }
+
+        
+        [HarmonyPatch(typeof(UIUpgrades), "SetRerollCost")]
+        [HarmonyPrefix]
+        public static void SetRerollCost(UIUpgrades __instance)
+        {
+            if (!rerolluses.Value)
+            {
+                return;
+            }
+            logger.LogWarning($"SetRerollCost");
+            __instance.rerolluses = 0;
         }
 
 
