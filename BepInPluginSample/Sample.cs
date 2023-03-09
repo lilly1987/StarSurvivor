@@ -50,6 +50,9 @@ namespace BepInPluginSample
         private static ConfigEntry<bool> isPickup;
         private static ConfigEntry<bool> noDeductGold;
         private static ConfigEntry<bool> rerolluses;
+        private static ConfigEntry<bool> upGainExp;
+        private static ConfigEntry<bool> isUpgradeable;
+        private static ConfigEntry<int> upGainExpVal;
         // =========================================================
         #endregion
 
@@ -83,7 +86,9 @@ namespace BepInPluginSample
             isPickup = Config.Bind("game", "isPickup", true);
             noDeductGold = Config.Bind("game", "noDeductGold", true);
             rerolluses = Config.Bind("game", "rerolluses", true);
-            // xpMulti = Config.Bind("game", "xpMulti", 2f);
+            upGainExp = Config.Bind("game", "upGainExp", true);
+            isUpgradeable = Config.Bind("game", "isUpgradeable", true);
+            upGainExpVal = Config.Bind("game", "upGainExpVal", 10);
 
             // =========================================================
             #endregion
@@ -194,13 +199,33 @@ namespace BepInPluginSample
                 if (GUILayout.Button($"isPickup {isPickup.Value}")) { isPickup.Value = !isPickup.Value; }
                 if (GUILayout.Button($"noDeductGold {noDeductGold.Value}")) { noDeductGold.Value = !noDeductGold.Value; }
                 if (GUILayout.Button($"rerolluses {rerolluses.Value}")) { rerolluses.Value = !rerolluses.Value; }
+                if (GUILayout.Button($"isUpgradeable {isUpgradeable.Value}")) { isUpgradeable.Value = !isUpgradeable.Value; }
                 if (GUILayout.Button($"campaign.gold=1000000")) { Singleton<SaveController>.i.data.campaign.gold=1000000; }
+                if (GUILayout.Button($"select upgrade")) { Singleton<UIManager>.i.menus.ShowMenu("select upgrade", true); }
                 
-                // GUILayout.BeginHorizontal();
-                // GUILayout.Label($"ammoMulti {ammoMulti.Value}");
-                // if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20))) { ammoMulti.Value += 1; }
-                // if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20))) { ammoMulti.Value -= 1; }
-                // GUILayout.EndHorizontal();
+                if (GUILayout.Button($"upGainExp {upGainExp.Value}")) { upGainExp.Value = !upGainExp.Value; }
+
+                if (GUILayout.Button($"UpgradeAll")) { Singleton<SaveController>.i.data.UpgradeAll(); }
+                if (GUILayout.Button($"UnlockAll")) { Singleton<SaveController>.i.data.UnlockAll(); }
+                if (GUILayout.Button($"card.level = 1 all decks")) { 
+
+                    foreach (var deck in Singleton<SaveController>.i.data.decks)
+                    {
+                        foreach (var card in deck.cards)
+                        {
+                            card.level = 1;
+                        }
+                    }
+                    
+
+
+                }
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"ammoMulti {upGainExpVal.Value}");
+                if (GUILayout.Button("+", GUILayout.Width(20), GUILayout.Height(20))) { upGainExpVal.Value += 1; }
+                if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20))) { upGainExpVal.Value -= 1; }
+                GUILayout.EndHorizontal();
 
                 // =========================================================
                 #endregion
@@ -271,7 +296,36 @@ namespace BepInPluginSample
             logger.LogWarning($"SetRerollCost");
             __instance.rerolluses = 0;
         }
-
+        
+        
+        [HarmonyPatch(typeof(PlayerStats), "GainExp")]
+        [HarmonyPrefix]
+        public static void GainExp(ref float amount)
+        {
+            if (!upGainExp.Value)
+            {
+                return;
+            }
+            logger.LogWarning($"SetRerollCost");
+            amount*= upGainExpVal.Value;
+        }
+        
+        
+        [HarmonyPatch(typeof(UIDeckViewer), "SelectCard")]
+        [HarmonyPrefix]
+        public static void SelectCard(UIDeckViewer __instance, UIDeckCard card)
+        {
+            if (!isUpgradeable.Value)
+            {
+                return;
+            }
+            logger.LogWarning($"SelectCard");
+            if (card .inst.isUpgradeable())
+            {
+                card.inst.data.level++;
+            }
+        }
+        
 
         /*
         [HarmonyPatch(typeof(PickupExp), "Setup")]
