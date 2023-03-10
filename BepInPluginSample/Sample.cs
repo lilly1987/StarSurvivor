@@ -199,27 +199,24 @@ namespace BepInPluginSample
                 if (GUILayout.Button($"isPickup {isPickup.Value}")) { isPickup.Value = !isPickup.Value; }
                 if (GUILayout.Button($"noDeductGold {noDeductGold.Value}")) { noDeductGold.Value = !noDeductGold.Value; }
                 if (GUILayout.Button($"rerolluses {rerolluses.Value}")) { rerolluses.Value = !rerolluses.Value; }
-                if (GUILayout.Button($"isUpgradeable {isUpgradeable.Value}")) { isUpgradeable.Value = !isUpgradeable.Value; }
                 if (GUILayout.Button($"campaign.gold=1000000")) { Singleton<SaveController>.i.data.campaign.gold=1000000; }
-                if (GUILayout.Button($"select upgrade")) { Singleton<UIManager>.i.menus.ShowMenu("select upgrade", true); }
                 
-                if (GUILayout.Button($"upGainExp {upGainExp.Value}")) { upGainExp.Value = !upGainExp.Value; }
+                if (GUILayout.Button($"isUpgradeable {isUpgradeable.Value}")) { isUpgradeable.Value = !isUpgradeable.Value; }
+                if (GUILayout.Button($"select upgrade")) { Singleton<UIManager>.i.menus.ShowMenu("select upgrade", true); }
 
                 if (GUILayout.Button($"UpgradeAll")) { Singleton<SaveController>.i.data.UpgradeAll(); }
                 if (GUILayout.Button($"UnlockAll")) { Singleton<SaveController>.i.data.UnlockAll(); }
                 if (GUILayout.Button($"card.level = 1 all decks")) { 
-
                     foreach (var deck in Singleton<SaveController>.i.data.decks)
                     {
                         foreach (var card in deck.cards)
                         {
                             card.level = 1;
                         }
-                    }
-                    
-
-
+                    }                   
                 }
+
+                if (GUILayout.Button($"upGainExp {upGainExp.Value}")) { upGainExp.Value = !upGainExp.Value; }
 
                 GUILayout.BeginHorizontal();
                 GUILayout.Label($"ammoMulti {upGainExpVal.Value}");
